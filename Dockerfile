@@ -1,4 +1,3 @@
-
 FROM golang:alpine AS build-env
 RUN apk --no-cache add git
 RUN go get -u github.com/golang/dep/cmd/dep
