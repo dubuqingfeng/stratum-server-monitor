@@ -1,0 +1,6 @@
+config.yaml
+.idea
+vendor
+config.*.yaml
+*.log
+*.log.*

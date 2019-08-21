@@ -174,6 +174,7 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 		p.SendNotification(notification)
 		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, old height: %d", height, p.Height))
 	}
+	// mutex
 	p.Height = height
 }
 

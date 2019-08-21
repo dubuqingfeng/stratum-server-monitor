@@ -4,6 +4,7 @@ import "github.com/jinzhu/configor"
 
 var Config = struct {
 	Name                                   string `default:"app_name"`
+	Debug                                  bool
 	MonitorName                            string `default:"ss-monitor"`
 	StratumServerConfigDatabaseTablePrefix string
 	GlobalDatabase                         MySQLDB
