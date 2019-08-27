@@ -1,0 +1,13 @@
+# at https://docs.docker.com/compose/compose-file/
+version: '3.3'
+services:
+  ss_monitor:
+    container_name: ss_monitor
+    image: dubuqingfeng/stratum-server-monitor
+    restart: always
+    command: ./stratum-server-monitor HeightFetch
+    volumes:
+      - ./configs/config.yaml:/app/configs/config.yaml
+      - ./logs:/app/logs
+    environment:
+      CONFIGOR_ENV: "production"
