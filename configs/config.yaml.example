@@ -1,0 +1,43 @@
+name: "ss-monitor"
+monitorname: "电脑"
+debug: true
+stratumserverconfigdatabase:
+  read:
+    name: "ss:config:read"
+    dsn: ":@tcp(127.0.0.1:3306)/ss_monitor_configs?charset=utf8mb4"
+  write:
+    name: "ss:config:write"
+    dsn: ":@tcp(127.0.0.1:3306)/ss_monitor_configs?charset=utf8mb4"
+stratumserverlogsdatabase:
+  read:
+    name: "ss:logs:read"
+    dsn: ":@tcp(127.0.0.1:3306)/ss_monitor_configs?charset=utf8mb4"
+  write:
+    name: "ss:logs:write"
+    dsn: ":@tcp(127.0.0.1:3306)/ss_monitor_configs?charset=utf8mb4"
+stratumservermonitordatabase:
+  read:
+    name: "ss:monitor:read"
+    dsn: ":@tcp(127.0.0.1:3306)/ss_monitor_configs?charset=utf8mb4"
+  write:
+    name: "ss:monitor:write"
+    dsn: ":@tcp(127.0.0.1:3306)/ss_monitor_configs?charset=utf8mb4"
+stratumserverlogsdatabasetableprefix: ""
+stratumserverconfigdatabasetableprefix: ""
+stratumservermonitordatabasetableprefix: ""
+senderconfig:
+  bearychat:
+    isenabled: true
+    groupendpoint: ""
+  slack:
+    isenabled: false
+    robottoken: ""
+    channel: "ss-monitor"
+  mysql:
+    isenabled: true
+    logconfigdatabasetableprefix: ""
+    monitorconfigdatabasetableprefix: ""
+supportcoins:
+  - "btc"
+  - "bch"
+blacklist:

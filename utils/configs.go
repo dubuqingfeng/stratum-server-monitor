@@ -3,15 +3,19 @@ package utils
 import "github.com/jinzhu/configor"
 
 var Config = struct {
-	Name                                   string `default:"app_name"`
-	Debug                                  bool
-	MonitorName                            string `default:"ss-monitor"`
-	StratumServerConfigDatabaseTablePrefix string
-	GlobalDatabase                         MySQLDB
-	StratumServerConfigDatabase            MySQLDB
-	SenderConfig                           SenderConfig
-	SupportCoins                           []string
-	BlackList                              map[string]string
+	Name                                    string `default:"app_name"`
+	Debug                                   bool
+	MonitorName                             string `default:"ss-monitor"`
+	StratumServerConfigDatabaseTablePrefix  string
+	StratumServerLogsDatabaseTablePrefix    string
+	StratumServerMonitorDatabaseTablePrefix string
+	GlobalDatabase                          MySQLDB
+	StratumServerConfigDatabase             MySQLDB
+	StratumServerLogsDatabase               MySQLDB
+	StratumServerMonitorDatabase            MySQLDB
+	SenderConfig                            SenderConfig
+	SupportCoins                            []string
+	BlackList                               map[string]string
 }{}
 
 type SenderConfig struct {
@@ -27,8 +31,9 @@ type SenderConfig struct {
 		UnSupportTypes map[string]int
 	}
 	MySQL struct {
-		IsEnabled                    bool
-		LogConfigDatabaseTablePrefix string
+		IsEnabled                        bool
+		LogConfigDatabaseTablePrefix     string
+		MonitorConfigDatabaseTablePrefix string
 	}
 }
 
@@ -54,6 +59,8 @@ func GetAllDatabaseConfigs() map[string]string {
 	configs := make(map[string]string)
 	AddDatabaseConfig(Config.GlobalDatabase, configs)
 	AddDatabaseConfig(Config.StratumServerConfigDatabase, configs)
+	AddDatabaseConfig(Config.StratumServerMonitorDatabase, configs)
+	AddDatabaseConfig(Config.StratumServerLogsDatabase, configs)
 	return configs
 }
 

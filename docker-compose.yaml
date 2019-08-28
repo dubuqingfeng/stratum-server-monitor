@@ -5,7 +5,7 @@ services:
     container_name: ss_monitor
     image: dubuqingfeng/stratum-server-monitor
     restart: always
-    command: ./stratum-server-monitor HeightFetch
+    entrypoint: "/app/stratum-server-monitor HeightFetch"
     volumes:
       - ./configs/config.yaml:/app/configs/config.yaml
       - ./logs:/app/logs

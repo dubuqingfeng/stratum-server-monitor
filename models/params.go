@@ -22,8 +22,9 @@ type StratumServersParam struct {
 	Region       string
 }
 
+// get all stratum servers params
 func GetAllStratumServersParams() ([]StratumServersParam, error) {
-	conn := "ss:config:read"
+	conn := utils.Config.StratumServerConfigDatabase.Read.Name
 	var list []StratumServersParam
 	if exists := dbs.CheckDBConnExists(conn); !exists {
 		return list, errors.New("not found this database." + conn)

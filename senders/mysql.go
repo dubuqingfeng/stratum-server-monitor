@@ -43,7 +43,7 @@ func (s MySQLSender) Send(notifications []*models.Notification) {
 }
 
 func InsertNotificationsList(list []*models.Notification) error {
-	conn := "ss:config:write"
+	conn := utils.Config.StratumServerLogsDatabase.Write.Name
 	exists := dbs.CheckDBConnExists(conn)
 	if !exists {
 		return errors.New("not found this database." + conn)
@@ -77,12 +77,12 @@ func InsertNotificationsList(list []*models.Notification) error {
 
 // update stratum server height
 func UpdateStratumServerHeight(list []*models.Notification) error {
-	conn := "ss:config:write"
+	conn := utils.Config.StratumServerMonitorDatabase.Write.Name
 	exists := dbs.CheckDBConnExists(conn)
 	if !exists {
 		return errors.New("not found this database." + conn)
 	}
-	tableName := utils.Config.SenderConfig.MySQL.LogConfigDatabaseTablePrefix + "ss_heights"
+	tableName := utils.Config.SenderConfig.MySQL.MonitorConfigDatabaseTablePrefix + "ss_heights"
 	for _, item := range list {
 		var height int
 		globalSql := "SELECT height FROM " + tableName + " WHERE stratum_server_url = ? and type = ? " +

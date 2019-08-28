@@ -20,14 +20,14 @@ type StratumServerHeight struct {
 
 func GetStratumServerHeightsByCoinMySQL(coin string) ([]StratumServerHeight, error) {
 	// select * from ss_heights where coin_type = "btc" order by height desc;
-	conn := "ss:config:read"
+	conn := utils.Config.StratumServerMonitorDatabase.Read.Name
 	var list []StratumServerHeight
 	if exists := dbs.CheckDBConnExists(conn); !exists {
 		return list, errors.New("not found this database." + conn)
 	}
 
 	var sql string
-	prefix := utils.Config.StratumServerConfigDatabaseTablePrefix
+	prefix := utils.Config.StratumServerMonitorDatabaseTablePrefix
 	sql = fmt.Sprintf("select height, stratum_server_url, type, username, coin_type, description, notified_at"+
 		" from %s where coin_type = ? order by height desc;", prefix+"ss_heights")
 	rows, err := dbs.DBMaps[conn].Query(sql, coin)
