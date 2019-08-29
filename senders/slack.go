@@ -41,7 +41,12 @@ func (s SlackSender) Send(notifications []*models.Notification) {
 		return
 	}
 	for _, item := range notifications {
-		s.SingleSend(item)
+		if item.OldHeight >= item.Height {
+			s.SingleSend(item)
+		}
+		if utils.Config.SenderConfig.Slack.SingleSendEnabled {
+			s.SingleSend(item)
+		}
 	}
 }
 
@@ -76,6 +81,7 @@ func (s SlackSender) SendText(text string) {
 }
 
 func (s SlackSender) BuildMessage(notification *models.Notification) string {
-	return fmt.Sprintf("height:%d,type:%s,monitor:%s,username:%s,ss:%s", notification.Height, notification.Type,
-		utils.Config.MonitorName, notification.Username, notification.StratumServerURL)
+	return fmt.Sprintf("height:%d,old height:%d,type:%s,monitor:%s,username:%s,ss:%s", notification.Height,
+		notification.OldHeight, notification.Type, utils.Config.MonitorName, notification.Username,
+		notification.StratumServerURL)
 }

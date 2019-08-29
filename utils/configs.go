@@ -25,10 +25,11 @@ type SenderConfig struct {
 		UnSupportTypes map[string]int
 	}
 	Slack struct {
-		IsEnabled      bool
-		RobotToken     string
-		Channel        string
-		UnSupportTypes map[string]int
+		IsEnabled         bool
+		SingleSendEnabled bool
+		RobotToken        string
+		Channel           string
+		UnSupportTypes    map[string]int
 	}
 	MySQL struct {
 		IsEnabled                        bool
