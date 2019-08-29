@@ -168,9 +168,10 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 	}
 	if height != p.Height {
 		// The height has changed
+		prevHash := stratum.ParsePrevHash(p.Param.CoinType, resp)
 		notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
 			Type: "HeightChanged", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
-			StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
+			PrevHash: prevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
 		p.SendNotification(notification)
 		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, old height: %d", height, p.Height))
 	}

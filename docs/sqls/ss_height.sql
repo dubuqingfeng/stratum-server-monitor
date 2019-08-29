@@ -2,6 +2,7 @@ CREATE TABLE `ss_heights` (
   `height` bigint(20) NOT NULL DEFAULT '0',
   `stratum_server_url` varchar(255) NOT NULL DEFAULT '',
   `type` varchar(255) NOT NULL DEFAULT '',
+  `prev_hash` varchar(255) NOT NULL DEFAULT '',
   `username` varchar(50) NOT NULL DEFAULT '',
   `coin_type` varchar(50) NOT NULL DEFAULT '',
   `description` varchar(255) NOT NULL DEFAULT '',

@@ -13,3 +13,8 @@ func ParseHeight(coin string, resp interface{}) (height int64, err error) {
 	}
 	return btc.ParseHeight(nResp.CoinbaseTX1)
 }
+
+func ParsePrevHash(coin string, resp interface{}) (hash string) {
+	nResp := resp.(models.NotifyRes)
+	return btc.ParsePrevHash(nResp.Hash)
+}
