@@ -41,6 +41,9 @@ func (s SlackSender) Send(notifications []*models.Notification) {
 		return
 	}
 	for _, item := range notifications {
+		if _, ok := utils.Config.BlackList[item.StratumServerURL]; ok {
+			continue
+		}
 		if item.OldHeight >= item.Height {
 			s.SingleSend(item)
 		}
