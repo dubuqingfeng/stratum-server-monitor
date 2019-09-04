@@ -20,15 +20,16 @@ import (
 // by https://github.com/decred/gominer
 // stratum server
 type PoolHeightFetcher struct {
-	Param   models.StratumServersParam
-	Address string
-	Conn    net.Conn
-	Reader  *bufio.Reader
-	Height  int64
-	ID      uint64
-	AuthID  uint64
-	SubID   uint64
-	wg      sync.WaitGroup
+	Param    models.StratumServersParam
+	Address  string
+	Conn     net.Conn
+	Reader   *bufio.Reader
+	Height   int64
+	PrevHash string
+	ID       uint64
+	AuthID   uint64
+	SubID    uint64
+	wg       sync.WaitGroup
 }
 
 var errJsonType = errors.New("unexpected type in json")
@@ -166,17 +167,27 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 	if err != nil {
 		log.WithField("endpoint", p.Address).Errorf("failed to parse height %v", err)
 	}
+	prevHash := stratum.ParsePrevHash(p.Param.CoinType, resp)
 	if height != p.Height {
 		// The height has changed
-		prevHash := stratum.ParsePrevHash(p.Param.CoinType, resp)
 		notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
 			Type: "HeightChanged", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
 			PrevHash: prevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
 		p.SendNotification(notification)
 		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, old height: %d", height, p.Height))
 	}
+	// if height == p.Height && prevHash != p.PrevHash, create a notification.
+	if height == p.Height && prevHash != p.PrevHash {
+		notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
+			Type: "PrevHashChanged", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
+			PrevHash: prevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
+		p.SendNotification(notification)
+		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, hash: %s, old hash: %s",
+			prevHash, p.PrevHash, height))
+	}
 	// mutex
 	p.Height = height
+	p.PrevHash = prevHash
 }
 
 // Unmarshal the message

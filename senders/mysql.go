@@ -42,6 +42,7 @@ func (s MySQLSender) Send(notifications []*models.Notification) {
 	}
 }
 
+// insert to log table.
 func InsertNotificationsList(list []*models.Notification) error {
 	conn := utils.Config.StratumServerLogsDatabase.Write.Name
 	exists := dbs.CheckDBConnExists(conn)
