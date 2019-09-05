@@ -176,6 +176,7 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 		p.SendNotification(notification)
 		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, old height: %d", height, p.Height))
 	}
+
 	// if height == p.Height && prevHash != p.PrevHash, create a notification.
 	if height == p.Height && prevHash != p.PrevHash {
 		notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
@@ -184,6 +185,41 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 		p.SendNotification(notification)
 		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, hash: %s, old hash: %s",
 			prevHash, p.PrevHash, height))
+	}
+
+	// check coin base.
+	if p.Param.CoinType == "ltc" || p.Param.CoinType == "btc" || p.Param.CoinType == "bch" {
+		nResp := resp.(models.NotifyRes)
+		blockStr := nResp.CoinbaseTX1 + "111111112222222222222222" + nResp.CoinbaseTX2
+		if p.Param.Coinbase != "" {
+			blockAddressMissing := strings.Index(blockStr, p.Param.Coinbase)
+			if blockAddressMissing <= 0 {
+				notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
+					Type: "CoinbaseAddressMissed", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
+					PrevHash: prevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
+				p.SendNotification(notification)
+				log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, old height: %d", height, p.Height))
+			}
+		}
+		if p.Param.CoinbaseTags != "" {
+			var CoinbaseTags map[string]interface{}
+			err := json.Unmarshal([]byte(p.Param.CoinbaseTags), &CoinbaseTags)
+			if err != nil {
+				log.Error(err)
+			} else {
+				for key, value := range CoinbaseTags {
+					blockAddressMissing := strings.Index(blockStr, value.(string))
+					if blockAddressMissing <= 0 {
+						notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "",
+							Username: p.Param.Username, Type: "CoinbaseAddressMissed:" + key,
+							StratumServerURL: p.Address, CoinType: p.Param.CoinType, PrevHash: prevHash,
+							StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
+						p.SendNotification(notification)
+						log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, old height: %d", height, p.Height))
+					}
+				}
+			}
+		}
 	}
 	// mutex
 	p.Height = height
