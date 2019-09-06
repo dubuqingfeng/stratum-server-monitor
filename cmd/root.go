@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/dubuqingfeng/stratum-server-monitor/cmd/height"
+	"github.com/dubuqingfeng/stratum-server-monitor/cmd/pool"
 	"github.com/dubuqingfeng/stratum-server-monitor/dbs"
 	"github.com/dubuqingfeng/stratum-server-monitor/utils"
 	log "github.com/sirupsen/logrus"
@@ -44,6 +45,7 @@ func init() {
 	rootCmd.AddCommand(
 		height.NewHeightFetcherCommand(),
 		height.NewHeightMonitorCommand(),
+		pool.NewRunPoolDemoCommand(),
 	)
 }
 
