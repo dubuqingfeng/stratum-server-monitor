@@ -184,7 +184,7 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 			PrevHash: prevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
 		p.SendNotification(notification)
 		log.WithField("endpoint", p.Address).Info(fmt.Sprintf("height: %d, hash: %s, old hash: %s",
-			prevHash, p.PrevHash, height))
+			height, p.PrevHash, prevHash))
 	}
 
 	// check coin base.
@@ -356,10 +356,10 @@ func (p *PoolHeightFetcher) SendNotifications(notifications []*models.Notificati
 			continue
 		}
 		p.wg.Add(1)
-		go func(notifications []*models.Notification) {
-			item.Send(notifications)
+		go func(sender senders.Sender, notifications []*models.Notification) {
+			sender.Send(notifications)
 			p.wg.Done()
-		}(notifications)
+		}(item, notifications)
 	}
 }
 

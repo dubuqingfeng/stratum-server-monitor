@@ -29,7 +29,7 @@ func stratumServerHeightFetch(cmd *cobra.Command, args []string) {
 			}
 		}()
 	}
-	ssManager := manager.Manager{}
+	ssManager := manager.NewManager()
 	ssManager.Run()
 	quit := make(chan bool)
 	<-quit

@@ -12,7 +12,14 @@ import (
 type Manager struct {
 	fetchers map[string][]*fetchers.PoolHeightFetcher
 	// channel
-	wg sync.WaitGroup
+	wg *sync.WaitGroup
+}
+
+func NewManager() *Manager {
+	manager := &Manager{
+		wg: &sync.WaitGroup{},
+	}
+	return manager
 }
 
 func (m Manager) Run() {

@@ -29,8 +29,7 @@ func NewRunPoolDemoCommand() *cobra.Command {
 }
 
 func runPoolDemo(cmd *cobra.Command, args []string) {
-	var param models.StratumServersParam
-	param = models.StratumServersParam{Name: poolDemoArgs.PoolName, Username: poolDemoArgs.PoolUserName,
+	param := models.StratumServersParam{Name: poolDemoArgs.PoolName, Username: poolDemoArgs.PoolUserName,
 		Password: poolDemoArgs.PoolPassword, CoinType:poolDemoArgs.CoinType}
 	fetcher := fetchers.PoolHeightFetcher{Address: poolDemoArgs.PoolAddress, Param: param, ID: 1, AuthID: 2}
 	fetcher.Start()
