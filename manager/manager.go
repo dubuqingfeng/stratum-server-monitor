@@ -56,8 +56,6 @@ func (m Manager) AddServerParam() {
 
 // Load the new stratum server configuration
 func (m Manager) LoadAllStratumServers() {
-	//for {
-	//}
 }
 
 // Gets the height of the stratum server

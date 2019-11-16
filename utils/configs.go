@@ -21,6 +21,7 @@ var Config = struct {
 	StratumServerMonitorDatabase            MySQLDB
 	SenderConfig                            SenderConfig
 	SupportCoins                            []string
+	CompareWithNodeEnabled                  bool
 	BlackList                               map[string]string
 }{}
 
@@ -41,11 +42,12 @@ type SenderConfig struct {
 		UnSupportTypes    map[string]int
 	}
 	Slack struct {
-		IsEnabled         bool
-		SingleSendEnabled bool
-		RobotToken        string
-		Channel           string
-		UnSupportTypes    map[string]int
+		IsEnabled               bool
+		SingleSendEnabled       bool
+		RobotToken              string
+		Channel                 string
+		BlockTimeMonitorChannel string
+		UnSupportTypes          map[string]int
 	}
 	MySQL struct {
 		IsEnabled                        bool

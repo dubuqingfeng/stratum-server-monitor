@@ -50,3 +50,27 @@ func GetStratumServerHeightsByCoinMySQL(coin string) ([]StratumServerHeight, err
 	}
 	return list, nil
 }
+
+func GetPeerHeightsByCoinMySQL(coin string) (StratumServerHeight, error) {
+	// select * from peers where height = (select height from peers group by `height`
+	// order by COUNT(height) desc limit 0, 1) order by notified_at asc;
+	conn := utils.Config.StratumServerMonitorDatabase.Read.Name
+	var result StratumServerHeight
+	if exists := dbs.CheckDBConnExists(conn); !exists {
+		return result, errors.New("not found this database." + conn)
+	}
+
+	var sql string
+	//prefix := utils.Config.StratumServerMonitorDatabaseTablePrefix
+	sql = fmt.Sprintf("select height, address, type, coin_type, notified_at from %s where height = (select "+
+		"height from %s where coin_type = ? "+
+		"group by `height` order by COUNT(height) desc limit 0, 1) order by notified_at asc;", "peer", "peer")
+	rows := dbs.DBMaps[conn].QueryRow(sql, coin)
+	var item StratumServerHeight
+	if err := rows.Scan(&item.Height, &item.StratumServerURL, &item.Type, &item.CoinType,
+		&item.NotifiedAt); err != nil {
+		log.Error(err)
+		return result, err
+	}
+	return result, nil
+}

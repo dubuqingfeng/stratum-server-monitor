@@ -54,13 +54,13 @@ func (s SlackSender) Send(notifications []*models.Notification) {
 }
 
 func (s SlackSender) SingleSend(notification *models.Notification) {
-	s.SendText(s.BuildMessage(notification))
+	s.SendText(utils.Config.SenderConfig.Slack.Channel, "", s.BuildMessage(notification))
 }
 
-func (s SlackSender) SendText(text string) {
+func (s SlackSender) SendText(channel, title, text string) {
 	message := SlackMessage{
 		AsUser:  true,
-		Channel: utils.Config.SenderConfig.Slack.Channel,
+		Channel: channel,
 		Text:    text,
 	}
 	data := url.Values{}

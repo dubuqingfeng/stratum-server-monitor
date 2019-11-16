@@ -44,18 +44,18 @@ func (s AlertSender) Send(notifications []*models.Notification) {
 }
 
 func (s AlertSender) SingleSend(notification *models.Notification) {
-	s.SendText(s.BuildMessage(notification))
+	s.SendText("", s.BuildMessage(notification))
 }
 
 // send text
-func (s AlertSender) SendText(text string) {
+func (s AlertSender) SendText(title, text string) {
 	message := map[string]interface{}{
-		"action": "stratum_server_alert",
-		"channel": utils.Config.SenderConfig.Alert.Channel,
-		"title":  text,
-		"message": text,
-		"arg1": "",
-		"arg2": "",
+		"action":       "stratum_server_alert",
+		"channel":      utils.Config.SenderConfig.Alert.Channel,
+		"title":        title,
+		"message":      text,
+		"arg1":         "",
+		"arg2":         "",
 		"service_name": utils.Config.SenderConfig.Alert.ServiceName,
 	}
 

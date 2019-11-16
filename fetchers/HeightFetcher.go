@@ -20,17 +20,20 @@ import (
 // by https://github.com/decred/gominer
 // stratum server
 type PoolHeightFetcher struct {
-	Param    models.StratumServersParam
-	Address  string
-	Conn     net.Conn
-	Reader   *bufio.Reader
-	Height   int64
-	PrevHash string
-	ID       uint64
-	AuthID   uint64
-	SubID    uint64
-	wg       sync.WaitGroup
+	Param            models.StratumServersParam
+	Address          string
+	Conn             net.Conn
+	Reader           *bufio.Reader
+	Height           int64
+	PrevHash         string
+	ID               uint64
+	AuthID           uint64
+	SubID            uint64
+	wg               sync.WaitGroup
+	ConnFailureCount uint64
 }
+
+const ConnFailureCount = 10
 
 var errJsonType = errors.New("unexpected type in json")
 
@@ -40,6 +43,7 @@ func (p *PoolHeightFetcher) Start() {
 		if err := p.Dial(); err != nil {
 			p.HandleError(err)
 			time.Sleep(10 * time.Second)
+			p.ConnFailureCount += 1
 			continue
 		}
 		break
@@ -58,6 +62,7 @@ func (p *PoolHeightFetcher) Connect(limit int) error {
 		return errors.New("limit")
 	}
 	if err != nil {
+		p.ConnFailureCount += 1
 		p.HandleError(err)
 		time.Sleep(5 * time.Second)
 		return p.Connect(limit - 1)
@@ -124,6 +129,13 @@ func (p *PoolHeightFetcher) Listen() {
 	defer p.wg.Done()
 	log.Debug("Starting Listener")
 	for {
+		if p.ConnFailureCount >= ConnFailureCount {
+			notification := &models.Notification{Height: p.Height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
+				Type: "ConnectionFailed", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
+				PrevHash: p.PrevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
+			p.SendNotification(notification)
+			log.WithField("endpoint", p.Address).Info("Connection closed by server")
+		}
 		if p.Reader == nil {
 			p.Reconnect()
 		}
@@ -153,6 +165,7 @@ func (p *PoolHeightFetcher) Listen() {
 		default:
 			log.Debug("Unhandled message: ", result)
 		}
+		p.ConnFailureCount = 0
 	}
 }
 
