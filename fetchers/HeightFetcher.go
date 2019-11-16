@@ -232,6 +232,7 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		message map[string]json.RawMessage
 		method  string
 		id      uint64
+		height  uint64
 	)
 	if err := json.Unmarshal(blob, &message); err != nil {
 		return nil, err
@@ -241,6 +242,11 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 	}
 	if err := json.Unmarshal(message["id"], &id); err != nil {
 		return nil, err
+	}
+	if _, ok := message["height"]; ok {
+		if err := json.Unmarshal(message["height"], &height); err != nil {
+			return nil, err
+		}
 	}
 	if id == p.AuthID {
 		// {"id":2,"result":true,"error":null}
@@ -288,7 +294,11 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		if err := json.Unmarshal(message["params"], &res); err != nil {
 			return nil, err
 		}
-		return p.BuildNotifyRes(res)
+		nRes, err := p.BuildNotifyRes(res)
+		if height != 0 {
+			nRes.Height = float64(height)
+		}
+		return nRes, err
 
 	case "mining.set_difficulty":
 		// {"id":null,"method":"mining.set_difficulty","params":[64]}"
@@ -340,6 +350,25 @@ func (p *PoolHeightFetcher) BuildNotifyRes(res []interface{}) (models.NotifyRes,
 		}
 		return nres, nil
 	}
+	if p.Param.CoinType == "eth" || p.Param.CoinType == "etc" {
+		if nres.Header, ok = res[0].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.Header, ok = res[1].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.Seed, ok = res[2].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.ShareTarget, ok = res[3].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.CleanJobs, ok = res[4].(bool); !ok {
+			return nres, errJsonType
+		}
+		return nres, nil
+	}
+	// default: btc, ltc, dcr
 	if nres.JobID, ok = res[0].(string); !ok {
 		return nres, errJsonType
 	}

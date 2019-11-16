@@ -35,6 +35,9 @@ type NotifyRes struct {
 	CleanJobs      bool
 	Height         float64 // ckb
 	ParentHash     string  // ckb
+	Seed           string  // eth | etc
+	Header         string  // eth | etc
+	ShareTarget    string  // eth | etc
 }
 
 type StratumErr struct {

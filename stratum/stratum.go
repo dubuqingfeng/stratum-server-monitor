@@ -15,6 +15,9 @@ func ParseHeight(coin string, resp interface{}) (height int64, err error) {
 	if coin == "ckb" {
 		return ckb.ParseHeight(nResp.Height)
 	}
+	if coin == "eth" || coin == "etc" {
+		return ckb.ParseHeight(nResp.Height)
+	}
 	return btc.ParseHeight(nResp.CoinbaseTX1)
 }
 
