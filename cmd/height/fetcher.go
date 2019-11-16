@@ -20,8 +20,8 @@ func NewHeightFetcherCommand() *cobra.Command {
 }
 
 func stratumServerHeightFetch(cmd *cobra.Command, args []string) {
-	utils.ConfigLocalFilesystemLogger("./logs/", "fetcher.log", 7*time.Hour*24, time.Second*20)
-	// Initialization storage
+	utils.ConfigLocalFilesystemLogger("./logs/", "fetcher.log",
+		utils.Config.LogConfig.MaxAge*time.Hour*24, time.Second*20)
 	if utils.Config.Debug {
 		go func() {
 			if err := http.ListenAndServe("0.0.0.0:8080", nil); err != nil {

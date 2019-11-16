@@ -33,6 +33,8 @@ type NotifyRes struct {
 	Nbits          string
 	Ntime          string
 	CleanJobs      bool
+	Height         float64 // ckb
+	ParentHash     string  // ckb
 }
 
 type StratumErr struct {

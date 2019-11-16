@@ -288,33 +288,7 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		if err := json.Unmarshal(message["params"], &res); err != nil {
 			return nil, err
 		}
-		var ok bool
-		var nres = models.NotifyRes{}
-		if nres.JobID, ok = res[0].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.Hash, ok = res[1].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.CoinbaseTX1, ok = res[2].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.CoinbaseTX2, ok = res[3].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.BlockVersion, ok = res[5].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.Nbits, ok = res[6].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.Ntime, ok = res[7].(string); !ok {
-			return nil, errJsonType
-		}
-		if nres.CleanJobs, ok = res[8].(bool); !ok {
-			return nil, errJsonType
-		}
-		return nres, nil
+		return p.BuildNotifyRes(res)
 
 	case "mining.set_difficulty":
 		// {"id":null,"method":"mining.set_difficulty","params":[64]}"
@@ -341,6 +315,56 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		}
 		return resp, nil
 	}
+}
+
+func (p *PoolHeightFetcher) BuildNotifyRes(res []interface{}) (models.NotifyRes, error) {
+	var nres = models.NotifyRes{}
+	var ok bool
+	if p.Param.CoinType == "ckb" {
+		// https://wk588.com/forum.php?mod=viewthread&tid=19665
+		// "jobId", "header hash", height, "parent hash", cleanJob
+		if nres.JobID, ok = res[0].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.Hash, ok = res[1].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.Height, ok = res[2].(float64); !ok {
+			return nres, errJsonType
+		}
+		if nres.ParentHash, ok = res[3].(string); !ok {
+			return nres, errJsonType
+		}
+		if nres.CleanJobs, ok = res[4].(bool); !ok {
+			return nres, errJsonType
+		}
+		return nres, nil
+	}
+	if nres.JobID, ok = res[0].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.Hash, ok = res[1].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.CoinbaseTX1, ok = res[2].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.CoinbaseTX2, ok = res[3].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.BlockVersion, ok = res[5].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.Nbits, ok = res[6].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.Ntime, ok = res[7].(string); !ok {
+		return nres, errJsonType
+	}
+	if nres.CleanJobs, ok = res[8].(bool); !ok {
+		return nres, errJsonType
+	}
+	return nres, nil
 }
 
 func (p *PoolHeightFetcher) SendNotifications(notifications []*models.Notification) {

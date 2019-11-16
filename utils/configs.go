@@ -1,10 +1,16 @@
 package utils
 
-import "github.com/jinzhu/configor"
+import (
+	"github.com/jinzhu/configor"
+	"time"
+)
 
 var Config = struct {
-	Name                                    string `default:"app_name"`
-	Debug                                   bool
+	Name      string `default:"app_name"`
+	Debug     bool
+	LogConfig struct {
+		MaxAge time.Duration `default:"7"`
+	}
 	MonitorName                             string `default:"ss-monitor"`
 	StratumServerConfigDatabaseTablePrefix  string
 	StratumServerLogsDatabaseTablePrefix    string
@@ -23,6 +29,16 @@ type SenderConfig struct {
 		IsEnabled      bool
 		GroupEndpoint  string
 		UnSupportTypes map[string]int
+	}
+	Alert struct {
+		IsEnabled         bool
+		SingleSendEnabled bool
+		BaseURL           string
+		AlertRoute        string
+		ServiceName       string
+		ServiceToken      string
+		Channel           string
+		UnSupportTypes    map[string]int
 	}
 	Slack struct {
 		IsEnabled         bool
