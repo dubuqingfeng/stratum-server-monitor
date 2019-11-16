@@ -41,7 +41,7 @@ type NotifyRes struct {
 }
 
 type StratumErr struct {
-	ErrNum uint64
+	ErrNum float64
 	ErrStr string
 	Result *json.RawMessage `json:"result,omitempty"`
 }

@@ -34,7 +34,7 @@ type PoolHeightFetcher struct {
 }
 
 const ConnFailureCount = 10
-const ConnFailureLimitCount = 50
+const ConnFailureLimitCount = 15
 
 var errJsonType = errors.New("unexpected type in json")
 
@@ -156,17 +156,18 @@ func (p *PoolHeightFetcher) Listen() {
 		resp, err := p.Unmarshal([]byte(result))
 		if err != nil {
 			p.HandleError(err)
+			p.ConnFailureCount += 1
 			continue
 		}
 		switch resp.(type) {
 		case models.NotifyRes:
 			p.handleNotifyRes(resp)
+			p.ConnFailureCount = 0
 		case *models.SubscribeReply:
 			p.handleSubscribeReply(resp)
 		default:
 			log.Debug("Unhandled message: ", result)
 		}
-		p.ConnFailureCount = 0
 	}
 }
 
@@ -278,7 +279,7 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		resp := &models.BasicReply{ID: id, Result: result}
 		if errorHolder != nil {
 			var ok bool
-			if resp.Error.ErrNum, ok = errorHolder[0].(uint64); !ok {
+			if resp.Error.ErrNum, ok = errorHolder[0].(float64); !ok {
 				return nil, errJsonType
 			}
 			if resp.Error.ErrStr, ok = errorHolder[1].(string); !ok {
