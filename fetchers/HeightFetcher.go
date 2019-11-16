@@ -34,6 +34,7 @@ type PoolHeightFetcher struct {
 }
 
 const ConnFailureCount = 10
+const ConnFailureLimitCount = 50
 
 var errJsonType = errors.New("unexpected type in json")
 
@@ -129,9 +130,9 @@ func (p *PoolHeightFetcher) Listen() {
 	defer p.wg.Done()
 	log.Debug("Starting Listener")
 	for {
-		if p.ConnFailureCount >= ConnFailureCount {
+		if p.ConnFailureCount <= ConnFailureLimitCount && p.ConnFailureCount >= ConnFailureCount {
 			notification := &models.Notification{Height: p.Height, OldHeight: p.Height, Reason: "", Username: p.Param.Username,
-				Type: "ConnectionFailed", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
+				Type: "ConnectionFailure", StratumServerURL: p.Address, CoinType: p.Param.CoinType,
 				PrevHash: p.PrevHash, StratumServerType: p.Param.Type, NotifiedAt: time.Now().UTC().String()}
 			p.SendNotification(notification)
 			log.WithField("endpoint", p.Address).Info("Connection closed by server")
