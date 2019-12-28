@@ -47,6 +47,9 @@ func (s SlackSender) Send(notifications []*models.Notification) {
 		if item.OldHeight >= item.Height {
 			s.SingleSend(item)
 		}
+		if item.Height - item.OldHeight >= 10 {
+			s.SingleSend(item)
+		}
 		if utils.Config.SenderConfig.Slack.SingleSendEnabled {
 			s.SingleSend(item)
 		}

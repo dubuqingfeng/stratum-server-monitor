@@ -223,6 +223,10 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 				log.Error(err)
 			} else {
 				for key, value := range CoinbaseTags {
+					// when "{'nmc':''}" skip
+					if value == "" {
+						continue
+					}
 					blockAddressMissing := strings.Index(blockStr, value.(string))
 					if blockAddressMissing <= 0 {
 						notification := &models.Notification{Height: height, OldHeight: p.Height, Reason: "",
