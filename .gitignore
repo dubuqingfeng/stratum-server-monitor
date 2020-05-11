@@ -1,6 +1,8 @@
 config.yaml
 .idea
 vendor
+config.json
 config.*.yaml
 *.log
 *.log.*
+*.json.json

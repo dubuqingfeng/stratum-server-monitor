@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/dubuqingfeng/stratum-server-monitor/cmd/height"
 	"github.com/dubuqingfeng/stratum-server-monitor/cmd/pool"
@@ -8,6 +9,8 @@ import (
 	"github.com/dubuqingfeng/stratum-server-monitor/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/zouyx/agollo/v3"
+	"github.com/zouyx/agollo/v3/storage"
 	"os"
 )
 
@@ -54,11 +57,38 @@ func initApplication() {
 	initLog()
 }
 
+type ChangeListener struct {
+}
+
+func (c *ChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
+	fmt.Println("change listener.")
+	fmt.Println(changeEvent.Changes)
+}
+
+func initApolloConfig() {
+	namespaceName := ""
+	if err := agollo.Start(); err != nil {
+		fmt.Errorf("%v", err)
+	}
+	c := agollo.GetConfig(namespaceName)
+	isInit := c.GetIsInit()
+	log.Info(isInit)
+	if err := json.Unmarshal([]byte(c.GetValue("content")), &utils.Config); err != nil {
+		log.Error(err)
+	}
+	storage.AddChangeListener(&ChangeListener{})
+}
+
 // initConfig reads in config file.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		utils.InitConfig(cfgFile)
+	configDriverName := os.Getenv("CONFIG_DRIVER_NAME")
+	if configDriverName == "apollo" {
+		initApolloConfig()
+	} else {
+		if cfgFile != "" {
+			// Use config file from the flag.
+			utils.InitConfig(cfgFile)
+		}
 	}
 	dbs.InitMySQLDB()
 }
@@ -66,4 +96,3 @@ func initConfig() {
 func initLog() {
 	log.SetLevel(log.InfoLevel)
 }
-

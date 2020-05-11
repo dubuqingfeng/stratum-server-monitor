@@ -1,6 +1,8 @@
 name: "ss-monitor"
 monitorname: "电脑"
 debug: true
+logconfig:
+  maxage: 1
 stratumserverconfigdatabase:
   read:
     name: "ss:config:read"

@@ -28,6 +28,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/uudashr/gocognit v1.0.0 // indirect
+	github.com/zouyx/agollo/v3 v3.0.1
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47
 	golang.org/x/tools v0.0.0-20191010201905-e5ffc44a6fee // indirect
 	google.golang.org/appengine v1.6.1

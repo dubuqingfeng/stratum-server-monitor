@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-var Config = struct {
+var Config AppConfig
+
+type AppConfig struct {
 	Name      string `default:"app_name"`
 	Debug     bool
 	LogConfig struct {
@@ -23,7 +25,11 @@ var Config = struct {
 	SupportCoins                            []string
 	CompareWithNodeEnabled                  bool
 	BlackList                               map[string]string
-}{}
+}
+
+//var Config = struct {
+//
+//}{}
 
 type SenderConfig struct {
 	BearyChat struct {
