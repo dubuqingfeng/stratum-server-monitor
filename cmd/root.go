@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/zouyx/agollo/v3"
+	"github.com/zouyx/agollo/v3/env/config"
 	"github.com/zouyx/agollo/v3/storage"
 	"os"
 )
@@ -63,19 +64,33 @@ type ChangeListener struct {
 func (c *ChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 	fmt.Println("change listener.")
 	fmt.Println(changeEvent.Changes)
+	fmt.Println(changeEvent.Namespace)
 }
 
 func initApolloConfig() {
-	namespaceName := ""
+	namespaceName := "stratum-server-montior.json"
+	isCustomConfig := os.Getenv("IS_CUSTOM_CONFIG")
+	if isCustomConfig == "true" {
+		readyConfig := &config.AppConfig{
+			IsBackupConfig:   true,
+			BackupConfigPath: "./",
+			AppID:            utils.GetEnv("APOLLO_CUSTOM_CONFIG_APP_ID", ""),
+			Cluster:          utils.GetEnv("APOLLO_CUSTOM_CONFIG_CLUSTER_NAME", "default"),
+			NamespaceName:    namespaceName,
+			IP:               utils.GetEnv("APOLLO_CUSTOM_CONFIG_SERVICE_IP", ""),
+		}
+		agollo.InitCustomConfig(func() (*config.AppConfig, error) {
+			return readyConfig, nil
+		})
+	}
 	if err := agollo.Start(); err != nil {
-		fmt.Errorf("%v", err)
+		log.Error(err)
 	}
 	c := agollo.GetConfig(namespaceName)
-	isInit := c.GetIsInit()
-	log.Info(isInit)
 	if err := json.Unmarshal([]byte(c.GetValue("content")), &utils.Config); err != nil {
 		log.Error(err)
 	}
+	log.WithField("isInit", c.GetIsInit()).Info("apollo init completed.")
 	storage.AddChangeListener(&ChangeListener{})
 }
 
