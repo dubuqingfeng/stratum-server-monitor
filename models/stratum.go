@@ -3,9 +3,11 @@ package models
 import "encoding/json"
 
 type StratumMsg struct {
-	Method string      `json:"method"`
-	Params []string    `json:"params"`
-	ID     interface{} `json:"id"`
+	Method  string      `json:"method"`
+	Params  []string    `json:"params,omitempty"`
+	ID      interface{} `json:"id"`
+	JsonRPC string      `json:"jsonrpc,omitempty"`
+	APIKey  string      `json:"api_key,omitempty"` // beam stratum 协议字段
 }
 
 type BasicReply struct {
@@ -20,6 +22,7 @@ type StratumRsp struct {
 	ID     interface{}      `json:"id"`
 	Error  StratumErr       `json:"error,omitempty"`
 	Result *json.RawMessage `json:"result,omitempty"`
+	Height int64            `json:"height"` // beam
 }
 
 // NotifyRes models the json from a mining.notify message.

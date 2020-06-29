@@ -2,6 +2,7 @@ package fetchers
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -84,18 +85,34 @@ func (p *PoolHeightFetcher) Reconnect() {
 	p.Auth()
 }
 
+func (p *PoolHeightFetcher) TlsDial() (err error) {
+	config := tls.Config{InsecureSkipVerify: true}
+	p.Conn, err = tls.Dial("tcp", p.Address, &config)
+	return
+}
+
+func (p *PoolHeightFetcher) NetDial() (err error) {
+	p.Conn, err = net.Dial("tcp", p.Address)
+	return
+}
+
 // Dial
 func (p *PoolHeightFetcher) Dial() error {
 	var err error
-	if p.Conn, err = net.Dial("tcp", p.Address); err != nil {
-		return err
+	if p.Param.CoinType == "beam" {
+		err = p.TlsDial()
+	} else {
+		err = p.NetDial()
 	}
 	p.Reader = bufio.NewReader(p.Conn)
-	return nil
+	return err
 }
 
 // Subscribe to the event, https://gist.github.com/YihaoPeng/254d9daf3a5a80131507f32be6ed92df
 func (p *PoolHeightFetcher) Subscribe() {
+	if p.Param.CoinType == "beam" {
+		return
+	}
 	msg := models.StratumMsg{Method: "mining.subscribe", ID: p.ID, Params: []string{"b-miner"}}
 	p.SubID = msg.ID.(uint64)
 	p.ID++
@@ -104,9 +121,20 @@ func (p *PoolHeightFetcher) Subscribe() {
 
 // Auth by username and password
 func (p *PoolHeightFetcher) Auth() {
-	msg := models.StratumMsg{Method: "mining.authorize", ID: p.ID, Params: []string{p.Param.Username, p.Param.Password}}
+	var msg models.StratumMsg
+	method := "mining.authorize"
+	msg.ID = p.ID
+	msg.Method = method
+	msg.Params = []string{p.Param.Username, p.Param.Password}
 	p.AuthID = msg.ID.(uint64)
 	p.ID++
+	// beam
+	if p.Param.CoinType == "beam" {
+		msg.Method = "login"
+		msg.ID = "login"
+		msg.APIKey = p.Param.Username
+		msg.JsonRPC = "2.0"
+	}
 	p.WriteConn(msg)
 }
 
@@ -202,7 +230,7 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 			height, p.PrevHash, prevHash))
 	}
 
-	// check coin base.
+	// check coin base. LTC, BTC, BCH, BSV
 	if p.Param.CoinType == "ltc" || p.Param.CoinType == "btc" || p.Param.CoinType == "bch" {
 		nResp := resp.(models.NotifyRes)
 		blockStr := nResp.CoinbaseTX1 + "111111112222222222222222" + nResp.CoinbaseTX2
@@ -220,7 +248,7 @@ func (p *PoolHeightFetcher) handleNotifyRes(resp interface{}) {
 			var CoinbaseTags map[string]interface{}
 			err := json.Unmarshal([]byte(p.Param.CoinbaseTags), &CoinbaseTags)
 			if err != nil {
-				log.Error(err)
+				log.WithField("json", "unmarshal").Error(err)
 			} else {
 				for key, value := range CoinbaseTags {
 					// when "{'nmc':''}" skip
@@ -260,7 +288,11 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		method = ""
 	}
 	if err := json.Unmarshal(message["id"], &id); err != nil {
-		return nil, err
+		var idString string
+		if err = json.Unmarshal(message["id"], &idString); err != nil {
+			return nil, err
+		}
+		id, _ = strconv.ParseUint(idString, 10, 64)
 	}
 	if _, ok := message["height"]; ok {
 		if err := json.Unmarshal(message["height"], &height); err != nil {
@@ -335,6 +367,13 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		params = append(params, diffStr)
 		var nres = models.StratumMsg{Method: method, Params: params}
 		return nres, nil
+	// beam 特殊 method
+	case "job":
+		nRes := models.NotifyRes{}
+		if height != 0 {
+			nRes.Height = float64(height)
+		}
+		return nRes, nil
 
 	default:
 		resp := &models.StratumRsp{}
@@ -346,9 +385,15 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 	}
 }
 
+// build notify jobs response.
 func (p *PoolHeightFetcher) BuildNotifyRes(res []interface{}) (models.NotifyRes, error) {
 	var nres = models.NotifyRes{}
 	var ok bool
+	// beam
+	if p.Param.CoinType == "beam" {
+		return nres, nil
+	}
+	// ckb
 	if p.Param.CoinType == "ckb" {
 		// https://wk588.com/forum.php?mod=viewthread&tid=19665
 		// "jobId", "header hash", height, "parent hash", cleanJob
@@ -369,6 +414,7 @@ func (p *PoolHeightFetcher) BuildNotifyRes(res []interface{}) (models.NotifyRes,
 		}
 		return nres, nil
 	}
+	// eth, etc
 	if p.Param.CoinType == "eth" || p.Param.CoinType == "etc" {
 		if nres.Header, ok = res[0].(string); !ok {
 			return nres, errJsonType
