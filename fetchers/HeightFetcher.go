@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -134,6 +135,15 @@ func (p *PoolHeightFetcher) Auth() {
 		msg.ID = "login"
 		msg.APIKey = p.Param.Username
 		msg.JsonRPC = "2.0"
+	}
+	if p.Param.CoinType == "grin" {
+		msg.Method = "login"
+		msg.ID = "login"
+		msg.Params = map[string]string{
+			"login": p.Param.Username,
+			"pass":  p.Param.Password,
+			"agent": "grin-miner",
+		}
 	}
 	p.WriteConn(msg)
 }
@@ -367,12 +377,29 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		params = append(params, diffStr)
 		var nres = models.StratumMsg{Method: method, Params: params}
 		return nres, nil
-	// beam 特殊 method
+	// beam, grin 特殊 method
 	case "job":
 		nRes := models.NotifyRes{}
+		// grin
+		if p.Param.CoinType == "grin" {
+			var res map[string]interface{}
+			//res := make(map[string]interface{})
+			if err := json.Unmarshal(message["params"], &res); err != nil {
+				return nil, err
+			}
+			if reflect.TypeOf(res["height"]).String() != "float64"  {
+				return nil, errJsonType
+			}
+			var ok bool
+			nRes.Height, ok = res["height"].(float64)
+			if !ok {
+				return nil, errJsonType
+			}
+		}
 		if height != 0 {
 			nRes.Height = float64(height)
 		}
+
 		return nRes, nil
 
 	default:
