@@ -22,7 +22,7 @@ func NewManager() *Manager {
 	return manager
 }
 
-func (m Manager) Run() {
+func (m *Manager) Run() {
 	// listen the add stratum server event.
 	params, err := models.GetAllStratumServersParams()
 	if err != nil {
@@ -43,23 +43,23 @@ func (m Manager) Run() {
 		}
 	}
 
-	//go m.LoadAllStratumServers()
+	// go m.LoadAllStratumServers()
 	m.wg.Add(1)
 	go m.GetServersHeight()
 	m.wg.Wait()
 }
 
 // channel receive
-func (m Manager) AddServerParam() {
+func (m *Manager) AddServerParam() {
 
 }
 
 // Load the new stratum server configuration
-func (m Manager) LoadAllStratumServers() {
+func (m *Manager) LoadAllStratumServers() {
 }
 
 // Gets the height of the stratum server
-func (m Manager) GetServersHeight() {
+func (m *Manager) GetServersHeight() {
 	for {
 		for coin, items := range m.fetchers {
 			for _, item := range items {

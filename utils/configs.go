@@ -27,9 +27,9 @@ type AppConfig struct {
 	BlackList                               map[string]string
 }
 
-//var Config = struct {
+// var Config = struct {
 //
-//}{}
+// }{}
 
 type SenderConfig struct {
 	BearyChat struct {

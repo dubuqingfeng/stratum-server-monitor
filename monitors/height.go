@@ -13,11 +13,11 @@ import (
 type HeightMonitor struct {
 }
 
-func (h HeightMonitor) GetSupportCoin() []string {
+func (h *HeightMonitor) GetSupportCoin() []string {
 	return utils.Config.SupportCoins
 }
 
-func (h HeightMonitor) Run(coin string) {
+func (h *HeightMonitor) Run(coin string) {
 	var text string
 	var height int64
 	var latest models.StratumServerHeight

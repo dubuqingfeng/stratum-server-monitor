@@ -32,11 +32,11 @@ func init() {
 	SlackPusher = SlackSender{}
 }
 
-func (s SlackSender) IsSupport() bool {
+func (s *SlackSender) IsSupport() bool {
 	return utils.Config.SenderConfig.Slack.IsEnabled
 }
 
-func (s SlackSender) Send(notifications []*models.Notification) {
+func (s *SlackSender) Send(notifications []*models.Notification) {
 	if !utils.Config.SenderConfig.Slack.IsEnabled {
 		return
 	}
@@ -56,11 +56,11 @@ func (s SlackSender) Send(notifications []*models.Notification) {
 	}
 }
 
-func (s SlackSender) SingleSend(notification *models.Notification) {
+func (s *SlackSender) SingleSend(notification *models.Notification) {
 	s.SendText(utils.Config.SenderConfig.Slack.Channel, "", s.BuildMessage(notification))
 }
 
-func (s SlackSender) SendText(channel, title, text string) {
+func (s *SlackSender) SendText(channel, title, text string) {
 	message := SlackMessage{
 		AsUser:  true,
 		Channel: channel,
@@ -86,7 +86,7 @@ func (s SlackSender) SendText(channel, title, text string) {
 	log.Info(string(content))
 }
 
-func (s SlackSender) BuildMessage(notification *models.Notification) string {
+func (s *SlackSender) BuildMessage(notification *models.Notification) string {
 	return fmt.Sprintf("height:%d,old height:%d,type:%s,monitor:%s,username:%s,ss:%s", notification.Height,
 		notification.OldHeight, notification.Type, utils.Config.MonitorName, notification.Username,
 		notification.StratumServerURL)

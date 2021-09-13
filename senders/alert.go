@@ -22,11 +22,11 @@ func init() {
 	AlertPusher = AlertSender{}
 }
 
-func (s AlertSender) IsSupport() bool {
+func (s *AlertSender) IsSupport() bool {
 	return utils.Config.SenderConfig.Alert.IsEnabled
 }
 
-func (s AlertSender) Send(notifications []*models.Notification) {
+func (s *AlertSender) Send(notifications []*models.Notification) {
 	if !utils.Config.SenderConfig.Alert.IsEnabled {
 		return
 	}
@@ -43,12 +43,12 @@ func (s AlertSender) Send(notifications []*models.Notification) {
 	}
 }
 
-func (s AlertSender) SingleSend(notification *models.Notification) {
+func (s *AlertSender) SingleSend(notification *models.Notification) {
 	s.SendText("", s.BuildMessage(notification))
 }
 
 // send text
-func (s AlertSender) SendText(title, text string) {
+func (s *AlertSender) SendText(title, text string) {
 	message := map[string]interface{}{
 		"action":       "stratum_server_alert",
 		"channel":      utils.Config.SenderConfig.Alert.Channel,
@@ -87,7 +87,7 @@ func (s AlertSender) SendText(title, text string) {
 	log.Info(string(content))
 }
 
-func (s AlertSender) BuildMessage(notification *models.Notification) string {
+func (s *AlertSender) BuildMessage(notification *models.Notification) string {
 	return fmt.Sprintf("height:%d,old height:%d,type:%s,monitor:%s,username:%s,ss:%s", notification.Height,
 		notification.OldHeight, notification.Type, utils.Config.MonitorName, notification.Username,
 		notification.StratumServerURL)

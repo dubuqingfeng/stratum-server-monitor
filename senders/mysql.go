@@ -21,11 +21,11 @@ func init() {
 	MySQLPusher = MySQLSender{}
 }
 
-func (s MySQLSender) IsSupport() bool {
+func (s *MySQLSender) IsSupport() bool {
 	return utils.Config.SenderConfig.MySQL.IsEnabled
 }
 
-func (s MySQLSender) Send(notifications []*models.Notification) {
+func (s *MySQLSender) Send(notifications []*models.Notification) {
 	if !utils.Config.SenderConfig.MySQL.IsEnabled {
 		return
 	}

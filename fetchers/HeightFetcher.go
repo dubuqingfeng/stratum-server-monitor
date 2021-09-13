@@ -383,11 +383,11 @@ func (p *PoolHeightFetcher) Unmarshal(blob []byte) (interface{}, error) {
 		// grin
 		if p.Param.CoinType == "grin" {
 			var res map[string]interface{}
-			//res := make(map[string]interface{})
+			// res := make(map[string]interface{})
 			if err := json.Unmarshal(message["params"], &res); err != nil {
 				return nil, err
 			}
-			if reflect.TypeOf(res["height"]).String() != "float64"  {
+			if reflect.TypeOf(res["height"]).String() != "float64" {
 				return nil, errJsonType
 			}
 			var ok bool
@@ -492,7 +492,7 @@ func (p *PoolHeightFetcher) SendNotifications(notifications []*models.Notificati
 	if len(notifications) == 0 {
 		return
 	}
-	pushers := [2]senders.Sender{senders.SlackPusher, senders.MySQLPusher}
+	pushers := [2]senders.Sender{&senders.SlackPusher, &senders.MySQLPusher}
 	for _, item := range pushers {
 		if item == nil {
 			continue
@@ -510,7 +510,7 @@ func (p *PoolHeightFetcher) SendNotifications(notifications []*models.Notificati
 
 func (p *PoolHeightFetcher) SendNotification(notification *models.Notification) {
 	// pusher list
-	pushers := [2]senders.Sender{senders.SlackPusher, senders.MySQLPusher}
+	pushers := [2]senders.Sender{&senders.SlackPusher, &senders.MySQLPusher}
 	for _, item := range pushers {
 		if item == nil {
 			continue
