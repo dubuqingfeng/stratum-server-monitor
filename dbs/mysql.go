@@ -13,7 +13,7 @@ var (
 	DBMaps map[string]*sql.DB
 )
 
-// Initialize database
+// InitMySQLDB Initialize database
 func InitMySQLDB() {
 	// Initialize all mysql connections
 	DBMaps = make(map[string]*sql.DB)
@@ -36,7 +36,7 @@ func InitMySQLDB() {
 	}
 }
 
-// Check if the connection exists
+// CheckDBConnExists Check if the connection exists
 func CheckDBConnExists(conn string) bool {
 	if _, ok := DBMaps[conn]; ok {
 		return true

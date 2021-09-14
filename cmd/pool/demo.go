@@ -24,7 +24,7 @@ func NewRunPoolDemoCommand() *cobra.Command {
 	cc.Flags().StringVar(&poolDemoArgs.PoolName, "name", "", "name")
 	cc.Flags().StringVar(&poolDemoArgs.PoolUserName, "username", "", "username")
 	cc.Flags().StringVar(&poolDemoArgs.PoolPassword, "password", "", "password")
-	cc.Flags().StringVar(&poolDemoArgs.CoinType, "coin", "", "coin")
+	cc.Flags().StringVar(&poolDemoArgs.CoinType, "coin", "btc", "coin")
 	return cc
 }
 

@@ -16,10 +16,9 @@ type Manager struct {
 }
 
 func NewManager() *Manager {
-	manager := &Manager{
+	return &Manager{
 		wg: &sync.WaitGroup{},
 	}
-	return manager
 }
 
 func (m *Manager) Run() {
